@@ -1,27 +1,28 @@
-import azure.functions as func
-import datetime
-import json
+from flask import Flask, request, jsonify
 import logging
 
-app = func.FunctionApp()
+app = Flask(__name__)
 
-@app.route(route="CharCounter", auth_level=func.AuthLevel.ANONYMOUS)
-def CharCounter(req: func.HttpRequest) -> func.HttpResponse:
+@app.route('/CharCounter', methods=['GET', 'POST'])
+def CharCounter():
     logging.info('Python HTTP trigger function processed a request.')
 
-    name = req.params.get('name')
+    name = request.args.get('name')
     if not name:
         try:
-            req_body = req.get_json()
+            req_body = request.get_json()
         except ValueError:
-            pass
-        else:
+            req_body = None
+        if req_body:
             name = req_body.get('name')
 
     if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
+        return f"Hello, {name}. This HTTP triggered function executed successfully."
     else:
-        return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-             status_code=200
+        return (
+            "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
+            200
         )
+
+if __name__ == '__main__':
+    app.run(debug=True)
